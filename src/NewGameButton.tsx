@@ -4,8 +4,6 @@ import styled from "styled-components";
 export function NewGameButton(props: {
   gameIsOver: boolean;
   winGame: boolean;
-  usedLetters: string[];
-  word: string;
   buttonName: string;
   onClick: () => void;
 }): ReactElement {

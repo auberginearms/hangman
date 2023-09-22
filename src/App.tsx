@@ -44,11 +44,20 @@ function getNumberOfMistakes(letters: string[], word: string) {
   return lettersNotInWord.length;
 }
 
+function lessMistakesMade(
+  highScoreArray: Score,
+  word: string,
+  numberOfMistakes: number
+): boolean {
+  //compare the number of mistakes where the highscorearray.index.word and word are the same
+  return true;
+}
+
 function App(): ReactElement {
   const [usedLetters, setUsedLetters] = useState<string[]>([]);
   const [word, setWord] = useState(getRandomWord([""]));
   const numberOfMistakes = getNumberOfMistakes(usedLetters, word);
-  const winGame = word.split("").every((letter) => {
+  const gameIsWon = word.split("").every((letter) => {
     return usedLetters.join("").includes(letter);
   });
   const loseGame = numberOfMistakes === 6;
@@ -56,47 +65,48 @@ function App(): ReactElement {
   const wordAlreadyGuessed = highScoreArray.some((score) => {
     return score.word === word;
   });
-  function lessMistakesMade(
-    highScoreArray: Score,
-    word: string,
-    numberOfMistakes: number
-  ): boolean {
-    //compare the number of mistakes where the highscorearray.index.word and word are the same
-    return true;
-  }
+
   function onLetterPress(letter: string) {
     const newHighScoreArray = [...highScoreArray];
-    //gameWon needs a different name
-    const gameWon = word.split("").every((letter) => {
-      return newUsedLetters.join("").includes(letter);
-    });
     const letterIsNew = !usedLetters.some((usedLetter) => {
       return usedLetter === letter;
     });
     const newUsedLetters = [...usedLetters];
-    if (letterIsNew && !loseGame && !winGame) {
+
+    if (letterIsNew) {
       newUsedLetters.push(letter);
     }
+    const gameWillBeWon = word.split("").every((letter) => {
+      return newUsedLetters.join("").includes(letter);
+    });
+
+    if (gameWillBeWon) {
+      console.log("you won");
+    }
     setUsedLetters(newUsedLetters);
-    if (!wordAlreadyGuessed && !winGame && gameWon) {
-      newHighScoreArray.push({
-        word: word,
-        numberOfMistakes: numberOfMistakes,
-      });
-      return setHighScoreArray(newHighScoreArray);
-    }
-    if (gameWon && wordAlreadyGuessed && !winGame) {
-    }
+
+    // console.log("word already guessed:" + wordAlreadyGuessed);
+    // console.log("game won (newusedletters)):" + gameWon);
+
+    // if (!wordAlreadyGuessed && gameWon) {
+    //   newHighScoreArray.push({
+    //     word: word,
+    //     numberOfMistakes: numberOfMistakes,
+    //   });
+    //   console.log("newhighscorearray:" + newHighScoreArray);
+    //   return setHighScoreArray(newHighScoreArray);
+    // }
+    // if (wordAlreadyGuessed && !winGame) {
+    // }
+    // console.log(gameWon);
   }
 
   return (
     <MainLayout>
       <div style={{ display: "flex", flexDirection: "row" }}>
         <NewGameButton
-          winGame={winGame}
+          winGame={gameIsWon}
           gameIsOver={loseGame}
-          word={word}
-          usedLetters={usedLetters}
           buttonName={"GEN I POKEMON NAMES"}
           onClick={async () => {
             const newUsedLetters: string[] = [];
@@ -108,10 +118,8 @@ function App(): ReactElement {
           }}
         />
         <NewGameButton
-          winGame={winGame}
+          winGame={gameIsWon}
           gameIsOver={loseGame}
-          word={word}
-          usedLetters={usedLetters}
           buttonName={"GEN I POKEMON MOVES"}
           onClick={async () => {
             const newUsedLetters = [];
@@ -140,7 +148,7 @@ function App(): ReactElement {
       </button>
 
       {loseGame ? <div>GAME OVER</div> : <div></div>}
-      {winGame && word.length !== 0 ? <div>YOU WON</div> : null}
+      {gameIsWon && word.length !== 0 ? <div>YOU WON</div> : null}
       <Image hangmanProgress={numberOfMistakes} />
       <WordDisplay
         word={word}
@@ -150,7 +158,7 @@ function App(): ReactElement {
       <Keyboard
         usedLetters={usedLetters}
         word={word}
-        onLetterPress={onLetterPress}
+        onLetterPress={loseGame || gameIsWon ? undefined : onLetterPress}
       />
       <div>
         <ScoreBox highScoreArray={highScoreArray}></ScoreBox>

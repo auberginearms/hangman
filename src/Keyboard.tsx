@@ -10,7 +10,7 @@ const keyboardLetters = [
 export function Keyboard(props: {
   usedLetters: string[];
   word: string;
-  onLetterPress: (letter: string) => void;
+  onLetterPress?: (letter: string) => void;
 }): ReactElement {
   const { usedLetters, word, onLetterPress: onLetterPress } = props;
   const letterButtons = keyboardLetters.map((row) => {
@@ -20,7 +20,7 @@ export function Keyboard(props: {
           return (
             <button
               onClick={() => {
-                onLetterPress(letter);
+                onLetterPress?.(letter);
               }}
               style={{
                 height: 50,
