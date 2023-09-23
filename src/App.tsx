@@ -4,54 +4,26 @@ import { WordDisplay } from "./WordDisplay";
 import { styled } from "styled-components";
 import { NewGameButton } from "./NewGameButton";
 import { Keyboard } from "./Keyboard";
-import axios from "axios";
 import { ScoreBox } from "./ScoreBox";
 import { Score } from "./types";
+import {
+  getIndexOfExistingWord,
+  getNumberOfMistakes,
+  getNumberOfMistakesFromExistingWord,
+  getPokemonMoves,
+  getPokemonNames,
+  getRandomWord,
+  isWordAlreadyGuessed,
+  newHighScoreIsBetter,
+} from "./utils";
 
-const localMoves = ["high-jump", "get more", "pick-up-sticks"];
 const localPokemon = ["arr", "bar", "car"];
 
-async function getPokemonNames() {
-  const response = await axios.get("https://pokeapi.co/api/v2/generation/1/");
-  const generationOnePokemon: { name: string; url: string }[] =
-    response.data.pokemon_species;
-  const generationOnePokemonNames: string[] = generationOnePokemon.map(
-    (pokemon) => {
-      return pokemon.name;
-    }
-  );
-  return generationOnePokemonNames;
-}
-
-async function getPokemonMoves() {
-  const response = await axios.get("https://pokeapi.co/api/v2/generation/1/");
-  const generationOneMoves: { name: string; url: string }[] =
-    response.data.moves;
-  const generationOneMoveNames: string[] = generationOneMoves.map((move) => {
-    return move.name;
-  });
-  return generationOneMoveNames;
-}
-
-function getRandomWord(potentialWords: string[]): string {
-  return potentialWords[Math.floor(Math.random() * potentialWords.length)];
-}
-function getNumberOfMistakes(letters: string[], word: string) {
-  const lettersNotInWord = letters.filter((letter) => {
-    return !word.includes(letter);
-  });
-
-  return lettersNotInWord.length;
-}
-
-function lessMistakesMade(
-  highScoreArray: Score,
-  word: string,
-  numberOfMistakes: number
-): boolean {
-  //compare the number of mistakes where the highscorearray.index.word and word are the same
-  return true;
-}
+// const testHighScores: Score[] = [
+//   { word: "pichu", numberOfMistakes: 3 },
+//   { word: "pikachu", numberOfMistakes: 2 },
+//   { word: "raichu", numberOfMistakes: 0 },
+// ];
 
 function App(): ReactElement {
   const [usedLetters, setUsedLetters] = useState<string[]>([]);
@@ -61,44 +33,51 @@ function App(): ReactElement {
     return usedLetters.join("").includes(letter);
   });
   const loseGame = numberOfMistakes === 6;
-  const [highScoreArray, setHighScoreArray] = useState<Score>([]);
-  const wordAlreadyGuessed = highScoreArray.some((score) => {
-    return score.word === word;
-  });
-
+  const [highScoreArray, setHighScoreArray] = useState<Score[]>([]);
   function onLetterPress(letter: string) {
-    const newHighScoreArray = [...highScoreArray];
     const letterIsNew = !usedLetters.some((usedLetter) => {
       return usedLetter === letter;
     });
+
+    if (!letterIsNew) {
+      return;
+    }
+
     const newUsedLetters = [...usedLetters];
 
-    if (letterIsNew) {
-      newUsedLetters.push(letter);
-    }
+    newUsedLetters.push(letter);
+    setUsedLetters(newUsedLetters);
+
     const gameWillBeWon = word.split("").every((letter) => {
       return newUsedLetters.join("").includes(letter);
     });
 
-    if (gameWillBeWon) {
-      console.log("you won");
+    if (!gameWillBeWon) {
+      return;
     }
-    setUsedLetters(newUsedLetters);
+    const wordAlreadyGuessed = isWordAlreadyGuessed(highScoreArray, word);
+    const numberOfMistakesFromExistingWord =
+      getNumberOfMistakesFromExistingWord(highScoreArray, word);
+    const indexOfExistingWord = getIndexOfExistingWord(highScoreArray, word);
 
-    // console.log("word already guessed:" + wordAlreadyGuessed);
-    // console.log("game won (newusedletters)):" + gameWon);
+    const newHighScoreArray = [...highScoreArray];
 
-    // if (!wordAlreadyGuessed && gameWon) {
-    //   newHighScoreArray.push({
-    //     word: word,
-    //     numberOfMistakes: numberOfMistakes,
-    //   });
-    //   console.log("newhighscorearray:" + newHighScoreArray);
-    //   return setHighScoreArray(newHighScoreArray);
-    // }
-    // if (wordAlreadyGuessed && !winGame) {
-    // }
-    // console.log(gameWon);
+    if (
+      wordAlreadyGuessed &&
+      newHighScoreIsBetter(numberOfMistakesFromExistingWord, numberOfMistakes)
+    ) {
+      newHighScoreArray.splice(indexOfExistingWord, 1, {
+        word: word,
+        numberOfMistakes: numberOfMistakes,
+      });
+    }
+    if (!wordAlreadyGuessed) {
+      newHighScoreArray.push({
+        word: word,
+        numberOfMistakes: numberOfMistakes,
+      });
+    }
+    setHighScoreArray(newHighScoreArray);
   }
 
   return (
@@ -111,8 +90,8 @@ function App(): ReactElement {
           onClick={async () => {
             const newUsedLetters: string[] = [];
             const newWord = getRandomWord(localPokemon);
-            // const pokemonNameLibrary = await getPokemonNames();
-            // const randomWord = getRandomWord(pokemonNameLibrary);
+            const pokemonNameLibrary = await getPokemonNames();
+            // const newWord = getRandomWord(pokemonNameLibrary);
             setWord(newWord.toUpperCase());
             return setUsedLetters(newUsedLetters);
           }}
@@ -123,9 +102,9 @@ function App(): ReactElement {
           buttonName={"GEN I POKEMON MOVES"}
           onClick={async () => {
             const newUsedLetters = [];
-            // const pokemonMoveLibrary = await getPokemonMoves();
-            // const randomWord = getRandomWord(pokemonMoveLibrary);
-            const newWord = getRandomWord(localMoves);
+            const pokemonMoveLibrary = await getPokemonMoves();
+            const newWord = getRandomWord(pokemonMoveLibrary);
+            // const newWord = getRandomWord(localMoves);
             setWord(newWord.toUpperCase());
 
             if (newWord.includes(" ")) {
@@ -144,7 +123,14 @@ function App(): ReactElement {
           setUsedLetters([]);
         }}
       >
-        RESET
+        RESET WORD
+      </button>
+      <button
+        onClick={() => {
+          setHighScoreArray([]);
+        }}
+      >
+        RESET SCORES
       </button>
 
       {loseGame ? <div>GAME OVER</div> : <div></div>}

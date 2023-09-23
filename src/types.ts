@@ -1,1 +1,1 @@
-export type Score = { word: string; numberOfMistakes: number }[];
+export type Score = { word: string; numberOfMistakes: number };

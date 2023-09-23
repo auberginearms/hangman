@@ -2,17 +2,13 @@ import { ReactElement } from "react";
 import { styled } from "styled-components";
 import { Score } from "./types";
 
-const testHighScores = [
-  { word: "pichu", mistakes: 3 },
-  { word: "pikachu", mistakes: 2 },
-  { word: "raichu", mistakes: 0 },
-];
-
-export function ScoreBox(props: { highScoreArray: Score }): ReactElement {
+export function ScoreBox(props: { highScoreArray: Score[] }): ReactElement {
   const { highScoreArray } = props;
   return (
     <Box>
-      LEAST MISTAKES RECORDS
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        RECORDS (LEAST MISTAKES)
+      </div>
       {highScoreArray.map((score) => {
         return (
           <div>
