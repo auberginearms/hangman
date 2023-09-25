@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { Image } from "./Image";
 import { WordDisplay } from "./WordDisplay";
 import { styled } from "styled-components";
@@ -13,6 +13,7 @@ import {
   getPokemonMoves,
   getPokemonNames,
   getRandomWord,
+  getSavedHighScores,
   isWordAlreadyGuessed,
   newHighScoreIsBetter,
 } from "./utils";
@@ -34,6 +35,13 @@ function App(): ReactElement {
   });
   const loseGame = numberOfMistakes === 6;
   const [highScoreArray, setHighScoreArray] = useState<Score[]>([]);
+  console.log(highScoreArray);
+  useEffect(() => {
+    getSavedHighScores().then((highScoreArray: Score[]) => {
+      setHighScoreArray(highScoreArray);
+    });
+  }, []);
+
   function onLetterPress(letter: string) {
     const letterIsNew = !usedLetters.some((usedLetter) => {
       return usedLetter === letter;
@@ -118,6 +126,10 @@ function App(): ReactElement {
           }}
         />
       </div>
+
+      {loseGame ? <div>GAME OVER</div> : <div></div>}
+      {gameIsWon && word.length !== 0 ? <div>YOU WON</div> : null}
+      <Image hangmanProgress={numberOfMistakes} />
       <button
         onClick={() => {
           setUsedLetters([]);
@@ -125,28 +137,26 @@ function App(): ReactElement {
       >
         RESET WORD
       </button>
-      <button
-        onClick={() => {
-          setHighScoreArray([]);
-        }}
-      >
-        RESET SCORES
-      </button>
-
-      {loseGame ? <div>GAME OVER</div> : <div></div>}
-      {gameIsWon && word.length !== 0 ? <div>YOU WON</div> : null}
-      <Image hangmanProgress={numberOfMistakes} />
       <WordDisplay
         word={word}
         usedLetters={usedLetters}
         gameIsOver={loseGame}
       />
+
       <Keyboard
         usedLetters={usedLetters}
         word={word}
         onLetterPress={loseGame || gameIsWon ? undefined : onLetterPress}
       />
       <div>
+        <button
+          onClick={() => {
+            setHighScoreArray([]);
+          }}
+        >
+          RESET SCORES
+        </button>
+        <button onClick={() => {}}>SAVE SCORES FOR NEXT SESSION</button>
         <ScoreBox highScoreArray={highScoreArray}></ScoreBox>
       </div>
     </MainLayout>

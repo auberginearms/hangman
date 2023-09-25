@@ -2,15 +2,14 @@ import axios from "axios";
 import { Score } from "./types";
 //pantryID 401834a3-d1fa-4cad-8395-0e134561dab9
 
-export async function getSavedHighScores() {
+export async function getSavedHighScores(): Promise<Score[]> {
   const response = await axios.get(
     "https://getpantry.cloud/apiv1/pantry/401834a3-d1fa-4cad-8395-0e134561dab9/basket/Score"
   );
-  const highScores: Score[] = response.data.scores;
+  const highScores = response.data.scores;
   console.log(highScores);
   return highScores;
 }
-console.log(getSavedHighScores());
 
 export async function getPokemonNames() {
   const response = await axios.get("https://pokeapi.co/api/v2/generation/1/");
