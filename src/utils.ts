@@ -56,14 +56,17 @@ export function isWordAlreadyGuessed(
 export function getNumberOfMistakesFromExistingWord(
   highScoreArray: Score[],
   word: string
-): number {
-  let mistakes = 0;
-  highScoreArray.forEach((score) => {
-    if (score.word === word) {
-      mistakes += score.numberOfMistakes;
-    }
-  });
-  return mistakes;
+) {
+//   let mistakes = 0;
+//   highScoreArray.forEach((score) => {
+//     if (score.word === word) {
+//       mistakes += score.numberOfMistakes;
+//     }
+//   });
+//   return mistakes;
+    return highScoreArray.find((score) => {
+      score.word === word;
+    })?.numberOfMistakes;
 }
 
 export function newHighScoreIsBetter(
@@ -74,11 +77,7 @@ export function newHighScoreIsBetter(
 }
 
 export function getIndexOfExistingWord(highScoreArray: Score[], word: string) {
-  let indexOfExistingWord = 0;
-  highScoreArray.forEach((score, index) => {
-    if (score.word === word) {
-      indexOfExistingWord += index;
-    }
+  return highScoreArray.findIndex((score) => {
+    return score.word === word;
   });
-  return indexOfExistingWord;
 }
