@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { styled } from "styled-components";
 
 const keyboardLetters = [
@@ -12,7 +12,7 @@ export function Keyboard(props: {
   word: string;
   onLetterPress?: (letter: string) => void;
 }): ReactElement {
-  const { usedLetters, word, onLetterPress: onLetterPress } = props;
+  const { usedLetters, word, onLetterPress } = props;
   const letterButtons = keyboardLetters.map((row) => {
     return (
       <KeyboardStyling>

@@ -7,8 +7,21 @@ export async function getSavedHighScores(): Promise<Score[]> {
     "https://getpantry.cloud/apiv1/pantry/401834a3-d1fa-4cad-8395-0e134561dab9/basket/Score"
   );
   const highScores = response.data.scores;
+  function removeDuplicateHighScores(): Score[] {
+    return [{ word: "ear", numberOfMistakes: 0 }];
+  }
   console.log(highScores);
+
   return highScores;
+}
+
+export async function saveHighScores(scores: Score[]) {
+  const response = await axios.put(
+    "https://getpantry.cloud/apiv1/pantry/401834a3-d1fa-4cad-8395-0e134561dab9/basket/Score",
+    { scores }
+  );
+  const highScores = response.data.scores;
+  return;
 }
 
 export async function getPokemonNames() {
@@ -44,6 +57,23 @@ export function getNumberOfMistakes(letters: string[], word: string) {
   return lettersNotInWord.length;
 }
 
+export const data = (highScoreArray: Score[], word: string) => {
+  const wordAlreadyGuessed = highScoreArray.some((score) => {
+    return score.word === word;
+  });
+  const numberOfMistakesFromExistingWord = highScoreArray.find((score) => {
+    return score.word === word;
+  })?.numberOfMistakes;
+  const indexOfExistingWord = highScoreArray.findIndex((score) => {
+    return score.word === word;
+  });
+  return {
+    wordAlreadyGuessed: wordAlreadyGuessed,
+    numberOfMistakesFromExistingWord: numberOfMistakesFromExistingWord,
+    indexOfExistingWord: indexOfExistingWord,
+  };
+};
+
 export function isWordAlreadyGuessed(
   highScoreArray: Score[],
   word: string
@@ -57,27 +87,17 @@ export function getNumberOfMistakesFromExistingWord(
   highScoreArray: Score[],
   word: string
 ) {
-//   let mistakes = 0;
-//   highScoreArray.forEach((score) => {
-//     if (score.word === word) {
-//       mistakes += score.numberOfMistakes;
-//     }
-//   });
-//   return mistakes;
-    return highScoreArray.find((score) => {
-      score.word === word;
-    })?.numberOfMistakes;
+  return highScoreArray.find((score) => {
+    return score.word === word;
+  })?.numberOfMistakes;
 }
 
-export function newHighScoreIsBetter(
-  numberOfMistakesFromExistingWord: number,
+export function newHighScoreIsBest(
+  numberOfMistakesFromExistingWord: number | undefined,
   numberOfMistakesfromCurrentWord: number
 ): boolean {
+  if (numberOfMistakesFromExistingWord === undefined) {
+    return true;
+  }
   return numberOfMistakesfromCurrentWord < numberOfMistakesFromExistingWord;
-}
-
-export function getIndexOfExistingWord(highScoreArray: Score[], word: string) {
-  return highScoreArray.findIndex((score) => {
-    return score.word === word;
-  });
 }
