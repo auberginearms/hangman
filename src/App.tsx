@@ -7,18 +7,17 @@ import { Keyboard } from "./Keyboard";
 import { ScoreBox } from "./ScoreBox";
 import { Score } from "./types";
 import {
-  getIndexOfExistingWord,
   getNumberOfMistakes,
-  getNumberOfMistakesFromExistingWord,
   getPokemonMoves,
   getPokemonNames,
   getRandomWord,
   getSavedHighScores,
-  isWordAlreadyGuessed,
-  newHighScoreIsBetter,
+  newHighScoreIsBest,
+  data,
+  saveHighScores,
 } from "./utils";
 
-const localPokemon = ["arr", "bar", "car"];
+const localPokemon = ["arr", "bar", "car", "dar", "ear", "far"];
 
 // const testHighScores: Score[] = [
 //   { word: "pichu", numberOfMistakes: 3 },
@@ -35,7 +34,6 @@ function App(): ReactElement {
   });
   const loseGame = numberOfMistakes === 6;
   const [highScoreArray, setHighScoreArray] = useState<Score[]>([]);
-  console.log(highScoreArray);
   useEffect(() => {
     getSavedHighScores().then((highScoreArray: Score[]) => {
       setHighScoreArray(highScoreArray);
@@ -63,16 +61,17 @@ function App(): ReactElement {
     if (!gameWillBeWon) {
       return;
     }
-    const wordAlreadyGuessed = isWordAlreadyGuessed(highScoreArray, word);
+    const blank = data(highScoreArray, word);
+    const wordAlreadyGuessed = blank.wordAlreadyGuessed;
     const numberOfMistakesFromExistingWord =
-      getNumberOfMistakesFromExistingWord(highScoreArray, word);
-    const indexOfExistingWord = getIndexOfExistingWord(highScoreArray, word);
+      blank.numberOfMistakesFromExistingWord;
+    const indexOfExistingWord = blank.indexOfExistingWord;
 
     const newHighScoreArray = [...highScoreArray];
 
     if (
       wordAlreadyGuessed &&
-      newHighScoreIsBetter(numberOfMistakesFromExistingWord, numberOfMistakes)
+      newHighScoreIsBest(numberOfMistakesFromExistingWord, numberOfMistakes)
     ) {
       newHighScoreArray.splice(indexOfExistingWord, 1, {
         word: word,
@@ -156,7 +155,13 @@ function App(): ReactElement {
         >
           RESET SCORES
         </button>
-        <button onClick={() => {}}>SAVE SCORES FOR NEXT SESSION</button>
+        <button
+          onClick={() => {
+            saveHighScores(highScoreArray);
+          }}
+        >
+          SAVE SCORES
+        </button>
         <ScoreBox highScoreArray={highScoreArray}></ScoreBox>
       </div>
     </MainLayout>
