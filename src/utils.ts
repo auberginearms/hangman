@@ -68,29 +68,11 @@ export const data = (highScoreArray: Score[], word: string) => {
     return score.word === word;
   });
   return {
-    wordAlreadyGuessed: wordAlreadyGuessed,
-    numberOfMistakesFromExistingWord: numberOfMistakesFromExistingWord,
-    indexOfExistingWord: indexOfExistingWord,
+    wordAlreadyGuessed,
+    numberOfMistakesFromExistingWord,
+    indexOfExistingWord,
   };
 };
-
-export function isWordAlreadyGuessed(
-  highScoreArray: Score[],
-  word: string
-): boolean {
-  return highScoreArray.some((score) => {
-    return score.word === word;
-  });
-}
-
-export function getNumberOfMistakesFromExistingWord(
-  highScoreArray: Score[],
-  word: string
-) {
-  return highScoreArray.find((score) => {
-    return score.word === word;
-  })?.numberOfMistakes;
-}
 
 export function newHighScoreIsBest(
   numberOfMistakesFromExistingWord: number | undefined,

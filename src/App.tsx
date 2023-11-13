@@ -7,23 +7,16 @@ import { Keyboard } from "./Keyboard";
 import { ScoreBox } from "./ScoreBox";
 import { Score } from "./types";
 import {
+  newHighScoreIsBest,
   getNumberOfMistakes,
   getPokemonMoves,
   getPokemonNames,
   getRandomWord,
   getSavedHighScores,
-  newHighScoreIsBest,
   data,
-  saveHighScores,
 } from "./utils";
 
-const localPokemon = ["arr", "bar", "car", "dar", "ear", "far"];
-
-// const testHighScores: Score[] = [
-//   { word: "pichu", numberOfMistakes: 3 },
-//   { word: "pikachu", numberOfMistakes: 2 },
-//   { word: "raichu", numberOfMistakes: 0 },
-// ];
+const localPokemon = ["arr", "bar", "car"];
 
 function App(): ReactElement {
   const [usedLetters, setUsedLetters] = useState<string[]>([]);
@@ -39,6 +32,7 @@ function App(): ReactElement {
       setHighScoreArray(highScoreArray);
     });
   }, []);
+  const dataFromPrisma = data(highScoreArray, word);
 
   function onLetterPress(letter: string) {
     const letterIsNew = !usedLetters.some((usedLetter) => {
@@ -61,11 +55,10 @@ function App(): ReactElement {
     if (!gameWillBeWon) {
       return;
     }
-    const blank = data(highScoreArray, word);
-    const wordAlreadyGuessed = blank.wordAlreadyGuessed;
+    const wordAlreadyGuessed = dataFromPrisma.wordAlreadyGuessed;
     const numberOfMistakesFromExistingWord =
-      blank.numberOfMistakesFromExistingWord;
-    const indexOfExistingWord = blank.indexOfExistingWord;
+      dataFromPrisma.numberOfMistakesFromExistingWord;
+    const indexOfExistingWord = dataFromPrisma.indexOfExistingWord;
 
     const newHighScoreArray = [...highScoreArray];
 
@@ -155,13 +148,7 @@ function App(): ReactElement {
         >
           RESET SCORES
         </button>
-        <button
-          onClick={() => {
-            saveHighScores(highScoreArray);
-          }}
-        >
-          SAVE SCORES
-        </button>
+        <button onClick={() => {}}>SAVE SCORES FOR NEXT SESSION</button>
         <ScoreBox highScoreArray={highScoreArray}></ScoreBox>
       </div>
     </MainLayout>
