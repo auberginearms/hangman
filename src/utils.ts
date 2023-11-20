@@ -7,16 +7,11 @@ export async function getSavedHighScores(): Promise<Score[]> {
     "https://getpantry.cloud/apiv1/pantry/401834a3-d1fa-4cad-8395-0e134561dab9/basket/Score"
   );
   const highScores = response.data.scores;
-  function removeDuplicateHighScores(): Score[] {
-    return [{ word: "ear", numberOfMistakes: 0 }];
-  }
-  console.log(highScores);
-
   return highScores;
 }
 
 export async function saveHighScores(scores: Score[]) {
-  const response = await axios.put(
+  const response = await axios.post(
     "https://getpantry.cloud/apiv1/pantry/401834a3-d1fa-4cad-8395-0e134561dab9/basket/Score",
     { scores }
   );

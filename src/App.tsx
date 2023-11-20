@@ -14,6 +14,7 @@ import {
   getRandomWord,
   getSavedHighScores,
   data,
+  saveHighScores,
 } from "./utils";
 
 const localPokemon = ["arr", "bar", "car"];
@@ -28,13 +29,16 @@ function App(): ReactElement {
   const loseGame = numberOfMistakes === 6;
   const [highScoreArray, setHighScoreArray] = useState<Score[]>([]);
   useEffect(() => {
-    getSavedHighScores().then((highScoreArray: Score[]) => {
-      setHighScoreArray(highScoreArray);
-    });
+    const fetchData = async () => {
+      const result = await getSavedHighScores();
+      setHighScoreArray(result);
+    };
+    fetchData();
   }, []);
+
   const dataFromPrisma = data(highScoreArray, word);
 
-  function onLetterPress(letter: string) {
+  async function onLetterPress(letter: string) {
     const letterIsNew = !usedLetters.some((usedLetter) => {
       return usedLetter === letter;
     });
@@ -59,8 +63,9 @@ function App(): ReactElement {
     const numberOfMistakesFromExistingWord =
       dataFromPrisma.numberOfMistakesFromExistingWord;
     const indexOfExistingWord = dataFromPrisma.indexOfExistingWord;
+    const freshestHighScores = await getSavedHighScores();
 
-    const newHighScoreArray = [...highScoreArray];
+    const newHighScoreArray = [...freshestHighScores];
 
     if (
       wordAlreadyGuessed &&
@@ -77,7 +82,9 @@ function App(): ReactElement {
         numberOfMistakes: numberOfMistakes,
       });
     }
+
     setHighScoreArray(newHighScoreArray);
+    await saveHighScores(newHighScoreArray);
   }
 
   return (
@@ -89,9 +96,8 @@ function App(): ReactElement {
           buttonName={"GEN I POKEMON NAMES"}
           onClick={async () => {
             const newUsedLetters: string[] = [];
-            const newWord = getRandomWord(localPokemon);
             const pokemonNameLibrary = await getPokemonNames();
-            // const newWord = getRandomWord(pokemonNameLibrary);
+            const newWord = getRandomWord(pokemonNameLibrary);
             setWord(newWord.toUpperCase());
             return setUsedLetters(newUsedLetters);
           }}
@@ -104,7 +110,6 @@ function App(): ReactElement {
             const newUsedLetters = [];
             const pokemonMoveLibrary = await getPokemonMoves();
             const newWord = getRandomWord(pokemonMoveLibrary);
-            // const newWord = getRandomWord(localMoves);
             setWord(newWord.toUpperCase());
 
             if (newWord.includes(" ")) {
@@ -148,7 +153,7 @@ function App(): ReactElement {
         >
           RESET SCORES
         </button>
-        <button onClick={() => {}}>SAVE SCORES FOR NEXT SESSION</button>
+
         <ScoreBox highScoreArray={highScoreArray}></ScoreBox>
       </div>
     </MainLayout>
