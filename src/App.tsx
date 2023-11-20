@@ -17,8 +17,6 @@ import {
   saveHighScores,
 } from "./utils";
 
-const localPokemon = ["arr", "bar", "car"];
-
 function App(): ReactElement {
   const [usedLetters, setUsedLetters] = useState<string[]>([]);
   const [word, setWord] = useState(getRandomWord([""]));
